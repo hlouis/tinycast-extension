@@ -311,6 +311,7 @@ export interface Preferences {
   reviewLabels?: string;
   includeLabels?: string;
   excludeLabels?: string;
+  overdueOnly?: boolean;
   hideArchived?: boolean;
 }
 

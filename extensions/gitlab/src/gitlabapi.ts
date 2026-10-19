@@ -141,6 +141,7 @@ interface GitLabIssueJson {
   assignees: GitLabUserJson[];
   project_id: number;
   milestone?: GitLabMilestoneJson;
+  due_date?: string | null;
   labels: Label[];
   user_notes_count?: number;
   merge_requests_count?: number;
@@ -330,6 +331,7 @@ export function jsonDataToIssue(issue: GitLabIssueJson): Issue {
     assignees: issue.assignees.map(userFromJson),
     project_id: issue.project_id,
     milestone: dataToMilestone(issue.milestone),
+    due_date: issue.due_date ?? undefined,
     labels: issue.labels as Label[],
     user_notes_count: issue.user_notes_count ?? 0,
     merge_requests_count: issue.merge_requests_count ?? 0,
@@ -443,6 +445,8 @@ export class Issue {
   public created_at = "";
   public project_id = 0;
   public milestone?: Milestone = undefined;
+  /** `YYYY-MM-DD`, as GitLab returns it. Absent when the issue has no due date. */
+  public due_date?: string = undefined;
   public labels: Label[] = [];
   public user_notes_count: number | undefined = undefined;
   public merge_requests_count: number = 0;

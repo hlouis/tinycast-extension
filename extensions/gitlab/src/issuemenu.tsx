@@ -39,6 +39,9 @@ export default function MenuCommand() {
     excludeLabels:
       preferences.excludeLabels && preferences.excludeLabels.trim().length > 0 ? preferences.excludeLabels : undefined,
     ...(preferences.hideArchived === true && { non_archived: true }),
+    // `due_date` is a GitLab REST filter; `overdue` means "due date in the past
+    // and still open", so the menu bar count becomes the overdue count.
+    ...(preferences.overdueOnly === true && { due_date: "overdue" }),
   });
 
   return (
@@ -70,6 +73,7 @@ export default function MenuCommand() {
                 tintColor: { light: "#000", dark: "#FFF", adjustContrast: false },
               }}
               title={`#${issue.iid} ${issue.title}`}
+              subtitle={issue.due_date ? `due ${issue.due_date}` : undefined}
               tooltip={issue.reference_full}
               onAction={() => open(issue.web_url)}
             />

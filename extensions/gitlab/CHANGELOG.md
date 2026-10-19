@@ -1,5 +1,11 @@
 # GitLab Changelog
 
+## [Overdue issues in the menu bar, and OAuth built on first use] - 2026-10-19
+
+- Add an `Overdue Only` preference to the Issues menu bar, so the count and the list cover issues whose due date has passed
+- Show an issue's due date next to its title in the menu bar
+- Build the OAuth PKCE client on first use, so a host without the `OAuth` API stays usable with a personal access token
+
 ## [My Merge Requests scope fix] - 2026-10-04
 
 - Change the `My Merge Requests` command to list merge requests you created, matching its title and the menu bar

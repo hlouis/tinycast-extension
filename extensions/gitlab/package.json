@@ -337,6 +337,15 @@
           "placeholder": "e.g. WIP,blocked"
         },
         {
+          "name": "overdueOnly",
+          "description": "Only show issues whose due date has passed",
+          "type": "checkbox",
+          "required": false,
+          "label": "Overdue Only",
+          "title": "Due Date",
+          "default": false
+        },
+        {
           "name": "hideArchived",
           "description": "Hide issues from archived projects",
           "type": "checkbox",
