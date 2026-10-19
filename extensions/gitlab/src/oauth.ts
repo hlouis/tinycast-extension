@@ -7,13 +7,21 @@ import { getInstance, getPreferences, OAUTH_SCOPES, requireOAuthClientId } from 
 // an `https.Agent`, which the `customcacert`, `customcert`, and `ignorecerts`
 // preferences require for self-hosted instances. Driving PKCE manually keeps
 // every request, including the token endpoint, behind `getHttpAgent()`.
-const client = new OAuth.PKCEClient({
-  redirectMethod: OAuth.RedirectMethod.Web,
-  providerName: "GitLab",
-  providerIcon: "gitlab.png",
-  providerId: "gitlab",
-  description: "Connect your GitLab account to Raycast.",
-});
+// Built on first use, not at import: `common.ts` imports this module for every
+// command, and a personal access token never reaches the OAuth path. Hosts that
+// implement only part of the API then stay usable with a PAT.
+let pkceClient: OAuth.PKCEClient | undefined;
+
+function client(): OAuth.PKCEClient {
+  pkceClient ??= new OAuth.PKCEClient({
+    redirectMethod: OAuth.RedirectMethod.Web,
+    providerName: "GitLab",
+    providerIcon: "gitlab.png",
+    providerId: "gitlab",
+    description: "Connect your GitLab account to Raycast.",
+  });
+  return pkceClient;
+}
 
 // Single-flight slots. Coalesce parallel 401-driven refreshes (GitLab rotates
 // the refresh token, so two concurrent uses race) and parallel cold starts
@@ -26,7 +34,7 @@ let inflightAuthorizationFlow: Promise<string> | null = null;
  * silently on expiry, and re-runs the full flow if refresh fails.
  */
 export async function authorize(): Promise<string> {
-  const tokenSet = await client.getTokens();
+  const tokenSet = await client().getTokens();
   if (tokenSet?.accessToken) {
     if (!tokenSet.isExpired()) return tokenSet.accessToken;
     if (tokenSet.refreshToken) {
@@ -53,7 +61,7 @@ function tryRefresh(): Promise<string | undefined> {
     try {
       // Re-read inside the lock: a concurrent refresh may have just stored a
       // new refresh token, so anything captured outside would be stale.
-      const tokenSet = await client.getTokens();
+      const tokenSet = await client().getTokens();
       if (!tokenSet?.refreshToken) return undefined;
       // Outside the catch below, so a missing Application ID surfaces as a
       // configuration error instead of being mistaken for a revoked token and
@@ -72,10 +80,10 @@ function tryRefresh(): Promise<string | undefined> {
       } catch {
         // Refresh rejected (revoked or aged out). Drop tokens; caller restarts
         // the full authorization flow.
-        await client.removeTokens();
+        await client().removeTokens();
         return undefined;
       }
-      await client.setTokens(tokens);
+      await client().setTokens(tokens);
       return tokens.access_token;
     } finally {
       inflightRefresh = null;
@@ -89,12 +97,12 @@ function runAuthorizationFlow(): Promise<string> {
   const flow = (async () => {
     const preference = getPreferences();
     const clientId = requireOAuthClientId(preference);
-    const authRequest = await client.authorizationRequest({
+    const authRequest = await client().authorizationRequest({
       endpoint: `${getInstance(preference)}/oauth/authorize`,
       clientId,
       scope: OAUTH_SCOPES.join(" "),
     });
-    const { authorizationCode } = await client.authorize(authRequest);
+    const { authorizationCode } = await client().authorize(authRequest);
     const tokens = await postToken(
       new URLSearchParams({
         client_id: clientId,
@@ -105,7 +113,7 @@ function runAuthorizationFlow(): Promise<string> {
       }),
       "Token exchange",
     );
-    await client.setTokens(tokens);
+    await client().setTokens(tokens);
     return tokens.access_token;
   })();
   // Release the slot only after it holds `flow`. Clearing it from inside the

@@ -10,6 +10,8 @@
 
 Raycast extension to create, search and modify issues, manage merge requests, projects and more.
 
+Maintained by [@hlouis](https://github.com/hlouis) for [Tinycast](https://github.com/abue-ammar/tinycast), forked from [raycast/extensions](https://github.com/raycast/extensions/tree/main/extensions/gitlab) by tonka3000. See the [repository README](../../README.md) for what differs from upstream.
+
   <p>
     <a href="https://www.raycast.com/tonka3000/gitlab">
       <img src="https://img.shields.io/badge/Raycast-store-red.svg"
