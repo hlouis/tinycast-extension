@@ -48,6 +48,8 @@ Commands run as `view`, `no-view` or `menu-bar`; a `menu-bar` or `no-view` comma
 
 Uninstalling an extension deletes everything it stored, preferences included — tokens and instance URLs have to be set again. They live in `~/Library/Application Support/com.tinycast.app/extension-data/<extension>.json`.
 
+Installing over an extension of the same name does not: both **Add from folder** and **Install from GitHub** replace the installed files and leave that file alone. So update in place and never uninstall first. The installed list looks unchanged when the manifest didn't change ([tinycast#1200](https://github.com/abue-ammar/tinycast/issues/1200)), which is not a failed install.
+
 To carry them across a reinstall, copy that file aside first. Restoring it only sticks while Tinycast is not running: a running app holds the preferences in memory and writes them back over the file.
 
 ## Changes against upstream
